@@ -1,0 +1,52 @@
+1. Day 1: Starting up the Project:
+
+	- Symfony2 installation :
+
+		http://localhost/symfony_jobeet/web/app_dev.php -> check installation
+		http://localhost/symfony_jobeet/web/config.php -> check system requirements
+
+	- Creating the Application Bundle :
+
+		php app/console generate:bundle --namespace=Ens/JobeetBundle --format=yml
+
+	- Clear the cache after generating the new bundle with:
+
+		php app/console cache:clear --env=prod
+		php app/console cache:clear --env=dev
+
+2. Day 2: The Project
+
+3. Day 3: The Data Model
+
+	- Database configuration:
+
+		app/config/parameters.yml
+
+	- Create the database:
+
+		php app/console doctrine:database:create
+
+	- Create table schema:
+
+		schema files:
+			src/Ens/JobeetBundle/Resources/config/doctrine/Category.orm.yml
+			src/Ens/JobeetBundle/Resources/config/doctrine/Job.orm.yml
+			src/Ens/JobeetBundle/Resources/config/doctrine/Affiliate.orm.yml
+			src/Ens/JobeetBundle/Resources/config/doctrine/CategoryAffiliate.orm.yml
+
+		create Entity files:
+			php app/console doctrine:generate:entities EnsJobeetBundle
+			=> will create Entity/Model files on src/Ens/Entity :
+			   - Affiliate.php
+			   - Category.php
+			   - CategoryAffiliate.php
+			   - Job.php
+
+	 	create the tables:
+	 		php app/console doctrine:schema:update --force
+
+	- Installing Doctrine Fixtures Bundle (for initial data):
+
+		get the "require" text from https://packagist.org/packages/doctrine/doctrine-fixtures-bundle
+		add it to 
+

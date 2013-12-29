@@ -47,6 +47,25 @@
 
 	- Installing Doctrine Fixtures Bundle (for initial data):
 
-		get the "require" text from https://packagist.org/packages/doctrine/doctrine-fixtures-bundle
-		add it to 
+		- get the "require" text from https://packagist.org/packages/doctrine/doctrine-fixtures-bundle
+		- add it to "require" section of the "composer.json"
+		- run "composer update" command
+		- add 'new Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle()' to $bundles array of app/AppKernel.php
+		- create new folder 'src/Ens/JobeetBundle/DataFixtures/ORM'
+		- create file fixtures: LoadCategoryData.php, LoadJobData.php
+		- load the fixtures with 'php app/console doctrine:fixtures:load' command
 
+	- Generate CRUD files:
+
+		php app/console doctrine:generate:crud --entity=EnsJobeetBundle:Job --route-prefix=ens_job --with-write --format=yml
+		=> This will create a new controller 'src/Ens/JobeetBundle/Controllers/JobController.php' and a new route file in 'src/Ens/JobeetBundle/Recources/config/routing/job.yml'
+
+		import the routing config from 'src/Ens/JobeetBundle/Recources/config/routing/job.yml' to 'Ens/JobeetByndle/Resources/config/routing.yml':
+
+		EnsJobeetBundle_job:
+    	    resource: "@EnsJobeetBundle/Resources/config/routing/job.yml"
+    	    prefix: /job
+
+    	test the routing:
+
+    		http://localhost/symfony_jobeet/web/app_dev.php/job/

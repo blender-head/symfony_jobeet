@@ -36,7 +36,7 @@
 
 		create Entity files:
 			php app/console doctrine:generate:entities EnsJobeetBundle
-			=> will create Entity/Model files on src/Ens/Entity :
+			=> will create Entity/Model files on src/Ens/JobeetBundle/Entity :
 			   - Affiliate.php
 			   - Category.php
 			   - CategoryAffiliate.php
@@ -47,25 +47,100 @@
 
 	- Installing Doctrine Fixtures Bundle (for initial data):
 
-		- get the "require" text from https://packagist.org/packages/doctrine/doctrine-fixtures-bundle
+		- get the "require" text from 'https://packagist.org/packages/doctrine/doctrine-fixtures-bundle'
 		- add it to "require" section of the "composer.json"
 		- run "composer update" command
-		- add 'new Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle()' to $bundles array of app/AppKernel.php
+		- add 'new Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle()' to $bundles array of 'app/AppKernel.php'
 		- create new folder 'src/Ens/JobeetBundle/DataFixtures/ORM'
-		- create file fixtures: LoadCategoryData.php, LoadJobData.php
+		- create file fixtures: 'src/Ens/JobeetBundle/DataFixtures/ORM/LoadCategoryData.php', 'src/Ens/JobeetBundle/DataFixtures/ORM/LoadJobData.php'
 		- load the fixtures with 'php app/console doctrine:fixtures:load' command
 
 	- Generate CRUD files:
 
 		php app/console doctrine:generate:crud --entity=EnsJobeetBundle:Job --route-prefix=ens_job --with-write --format=yml
-		=> This will create a new controller 'src/Ens/JobeetBundle/Controllers/JobController.php' and a new route file in 'src/Ens/JobeetBundle/Recources/config/routing/job.yml'
+			=> This will create a new controller 'src/Ens/JobeetBundle/Controllers/JobController.php' and a new route file in 'src/Ens/JobeetBundle/Recources/config/routing/job.yml'
 
 		import the routing config from 'src/Ens/JobeetBundle/Recources/config/routing/job.yml' to 'Ens/JobeetByndle/Resources/config/routing.yml':
 
-		EnsJobeetBundle_job:
-    	    resource: "@EnsJobeetBundle/Resources/config/routing/job.yml"
-    	    prefix: /job
+			EnsJobeetBundle_job:
+	    	    resource: "@EnsJobeetBundle/Resources/config/routing/job.yml"
+	    	    prefix: /job
 
     	test the routing:
 
     		http://localhost/symfony_jobeet/web/app_dev.php/job/
+
+4. Day 4: The Controller and the View:
+
+	- Render e template and pass values:
+
+		return $this->render('EnsJobeetBundle:Job:index.html.twig', array(
+            'entities' => $entities,
+        ));
+
+	- Create layout:
+
+		'src/Ens/JobeetBundle/Resources/views/layout.html.twig'
+
+	- Assets:
+
+		- images: 'src/Ens/JobeetBundle/Resources/public/images/'
+		- css: 'src/Ens/JobeetBundle/Resources/public/css/'
+
+		tell Symfony to make them available to the public:
+
+		'php app/console assets:install web'
+
+	- Twig syntax:
+
+		- {% extends 'EnsJobeetBundle::layout.html.twig' %} -> use 'layout.html.twig'
+		- {% block title %} {% endblock %} -> create block
+		- {{ parent() }} -> call parent content
+		- {{ asset('bundles/ensjobeet/css/job.css') }} -> use app assets
+
+5. Day 5: The Routing:
+
+	- Routing files:
+
+		- 'app/config/routing.yml' -> global routing config
+		- 'src/Ens/JobeetBundle/Resources/config/routing.yml' -> bundle routing coinfig
+
+	- Import routing file:
+
+		EnsJobeetBundle:
+    		resource: "@EnsJobeetBundle/Resources/config/routing.yml" -> import routing config from 'src/Ens/JobeetBundle/Resources/config/routing.yml'
+    		prefix:   /
+
+	- Routing syntax:
+
+		ens_job: -> routing name
+		    pattern:  / -> URL
+		    defaults: { _controller: "EnsJobeetBundle:Job:index" } -> controller and action to route
+
+		ens_job_create:
+		    pattern:  /create
+		    defaults: { _controller: "EnsJobeetBundle:Job:create" }
+		    requirements: { _method: post } -> route requirement (define HTTP method to expect)
+
+		ens_job_show:
+		    pattern:  /{company}/{location}/{id}/{position}
+		    defaults: { _controller: "EnsJobeetBundle:Job:show" }
+		    requirements:
+		        id:  \d+ -> route requirement (id must be a number)
+
+    - Custom library to 'slugify' the URL:
+
+    	'Utils/Jobeet.php'
+
+    - Debug app route:
+
+    	- php app/console router:debug -> debug all app route
+    	- php app/console router:debug ens_job_show -> debug a particular route
+
+6. Day 6: More with the Model
+
+	
+
+	
+
+

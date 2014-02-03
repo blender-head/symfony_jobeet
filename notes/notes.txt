@@ -137,7 +137,76 @@
     	- php app/console router:debug -> debug all app route
     	- php app/console router:debug ens_job_show -> debug a particular route
 
-6. Day 6: More with the Model
+6. Day 6: More with the Model:
+
+	- get active jobs only:
+
+		- add new 'setExpiresAtValue' to 'prePersist' life cycle callback to 'src/Ens/JobeetBundle/Resources/config/doctrine/Job.orm.yml'
+
+			lifecycleCallbacks:
+				prePersist: [ setCreatedAtValue, setExpiresAtValue ]
+			    preUpdate: [ setUpdatedAtValue ]
+
+		- rebuild the entities: 
+			php app/console doctrine:generate:entities EnsJobeetBundle
+
+	    - create the 'setExpiresAtValue' method to 'src/Ens/JobeetBundle/Entity/Job.php'
+
+	    - add new data fixtures to 'src/Ens/JobeetBundle/DataFixtures/ORM/LoadJobData.php'
+
+	    - reload the fixtures:
+	    	php app/console doctrine:fixtures:load
+
+	   	- create a custom repository class for Job entity. edit '/src/Ens/JobeetBundle/Resources/config/doctrine/Job.orm.yml', 
+	   	  and add 'repositoryClass' configuration to register the custom repository
+
+			Ens\JobeetBundle\Entity\Job:
+			  type: entity
+			  repositoryClass: Ens\JobeetBundle\Repository\JobRepository
+
+		- rebuild the entities:
+			php app/console doctrine:generate:entities EnsJobeetBundle
+			will create => 'src/Ens/JobeetBundle/Repository/JobRepository.php'
+
+		- add 'getActiveJobs' method to 'src/Ens/JobeetBundle/Repository/JobRepository.php'
+
+		- use the custom repository:
+			# src/JobeetBundle/Controller/JobController.php, indexAction()
+			$entities = $em->getRepository('EnsJobeetBundle:Job')->getActiveJobs();
+
+	- display jobs with category:
+
+		- create a custom repository class for Category entity. edit '/src/Ens/JobeetBundle/Resources/config/doctrine/Category.orm.yml', 
+	   	  and add 'repositoryClass' configuration to register the custom repository
+
+			Ens\JobeetBundle\Entity\Category:
+			  type: entity
+			  repositoryClass: Ens\JobeetBundle\Repository\CategoryRepository
+
+		- rebuild the entities:
+			php app/console doctrine:generate:entities EnsJobeetBundle
+			will create => 'src/Ens/JobeetBundle/Repository/CategoryRepository.php'
+
+		- add 'getWithJobs' method to 'src/Ens/JobeetBundle/Repository/CategoryRepository.php'
+
+		- add a new property and methods to Category entity class: 
+			private $active_jobs, setActiveJobs(), getActiveJobs()
+
+		- modify 'src/Ens/JobeetBundle/Resources/views/Job/index.html.twig' to display jobs with category
+
+		- create custom configuration in 'app/config/config.yml' to set the result limit:
+			parameters:
+    			max_jobs_on_homepage: 10
+
+    	- modify JobController indexAction() to load jobs with category
+
+    - don't show expired jobs on JobController showAction():
+
+    	- add 'getActiveJob' method to 'src/Ens/JobeetBundle/Repository/JobRepository.php'
+
+    	- change the showAction from the JobController to use the new repository method:
+    		$entity = $em->getRepository('EnsJobeetBundle:Job')->getActiveJob($id)
+
 
 	
 

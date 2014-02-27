@@ -61,7 +61,7 @@
 		$job_expired->setEmail('job@example.com');
 		$job_expired->setCreatedAt(new \DateTime('2005-12-01'));
 
-		for($i = 100; $i <= 110; $i++)
+		for($i = 100; $i <= 150; $i++)
 		{
 			$job = new Job();
 			$job->setCategory($em->merge($this->getReference('category-programming')));
@@ -79,7 +79,7 @@
 			$em->persist($job);
 		}
 
-		for($i = 111; $i <= 120; $i++)
+		for($i = 151; $i <= 200; $i++)
 		{
 			$job = new Job();
 			$job->setCategory($em->merge($this->getReference('category-administrator')));

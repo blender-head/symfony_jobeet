@@ -130,7 +130,7 @@
 
     - Custom library to 'slugify' the URL:
 
-    	'Utils/Jobeet.php'
+    	'src/Ens/JobeetBundle/Utils/Jobeet.php'
 
     - Debug app route:
 
@@ -141,7 +141,7 @@
 
 	- get active jobs only:
 
-		- add new 'setExpiresAtValue' to 'prePersist' life cycle callback to 'src/Ens/JobeetBundle/Resources/config/doctrine/Job.orm.yml'
+		- add new 'setExpiresAtValue' to 'prePersist' life cycle callback in 'src/Ens/JobeetBundle/Resources/config/doctrine/Job.orm.yml'
 
 			lifecycleCallbacks:
 				prePersist: [ setCreatedAtValue, setExpiresAtValue ]
@@ -150,7 +150,7 @@
 		- rebuild the entities: 
 			php app/console doctrine:generate:entities EnsJobeetBundle
 
-	    - create the 'setExpiresAtValue' method to 'src/Ens/JobeetBundle/Entity/Job.php'
+	    - create the 'setExpiresAtValue' method in 'src/Ens/JobeetBundle/Entity/Job.php'
 
 	    - add new data fixtures to 'src/Ens/JobeetBundle/DataFixtures/ORM/LoadJobData.php'
 
@@ -207,8 +207,78 @@
     	- change the showAction from the JobController to use the new repository method:
     		$entity = $em->getRepository('EnsJobeetBundle:Job')->getActiveJob($id)
 
+Day 7: Playing with the Category Page:
 
-	
+	- add routing for category page:
+
+		# src/Ens/JobeetBundle/Resources/config/routing.yml
+		EnsJobeetBundle_category:
+		    pattern:  /category/{slug}
+		    defaults: { _controller: EnsJobeetBundle:Category:show }
+
+    - add 'getSlug()' to 'src/Ens/JobeetBundle/Entity/Category.php'
+
+    - add link to category page in 'src/Ens/JobeetBundle/Resources/views/Job/index.html.twig':
+    	<h1><a href="{{ path('EnsJobeetBundle_category', { 'slug': category.slug }) }}">{{ category.name }}</a></h1>
+
+    - add new properties and methods to 'src/Ens/JobeetBundle/Entity/Category.php':
+    	- private $more_jobs;
+    	- setMoreJobs()
+    	- getMoreJobs()
+
+    - modify 'src/Ens/JobeetBundle/Controller/JobController.php', add this line:
+    	$category->setMoreJobs($em->getRepository('EnsJobeetBundle:Job')->countActiveJobs($category->getId()) - $this->container->getParameter('max_jobs_on_homepage'));
+
+    - add new 'countActiveJobs()' method to 'src/Ens/JobeetBundle/Repository/JobRepository.php'
+
+    - create Category controller:
+    	'src/Ens/JobeetBundle/Controller/CategoryController'
+
+    - add new 'slug' column to 'src/Ens/JobeetBundle/Resources/config/doctrine/Category.orm.yml'
+
+    - remove 'getSlug()' from 'src/Ens/JobeetBundle/Entity/Category.php'
+
+    - update the Category entity class:
+    	php app/console doctrine:generate:entities EnsJobeetBundle
+
+    - modify the 'setSlugValue()' in 'src/Ens/JobeetBundle/Entity/Category.php':
+    	$this->slug = Jobeet::slugify($this->getName());
+
+    - drop the database and create it again with the new Category column and load the fixtures:
+    	php app/console doctrine:database:drop --force
+		php app/console doctrine:database:create
+		php app/console doctrine:schema:update --force
+		php app/console doctrine:fixtures:load
+
+	- add 'showAction()' to 'src/Ens/JobeetBundle/Controller/CategoryController.php'
+
+	- create the category show view in 'src/Ens/JobeetBundle/Resources/views/Category/show.html.twig'
+
+	- including other twig templates:
+		- create 'src/Ens/JobeetBundle/Resources/views/Job/list.html.twig'
+		- include a template by using the using the {% include %}. replace the <table> HTML code from both templates with the include tag:
+			<!-- in src/Ens/JobeetBundle/Resources/view/Job/index.html.twig -->
+			{% include 'EnsJobeetBundle:Job:list.html.twig' with {'jobs': category.activejobs} %}
+			 
+			<!-- in src/Ens/JobeetBundle/Resources/view/Category/show.html.twig -->
+			{% include 'EnsJobeetBundle:Job:list.html.twig' with {'jobs': category.activejobs} %}
+
+	- list pagination:
+		- add a page parameter to the EnsJobeetBundle_category route:
+
+			# src/Ens/JobeetBundle/Resources/config/routing.yml
+ 			EnsJobeetBundle_category:
+			    pattern: /category/{slug}/{page}
+			    defaults: { _controller: EnsJobeetBundle:Category:show, page: 1 }
+
+		- the number of jobs on each page will be defined as a custom parameter in the 'app/config/config.yml' file:
+
+			parameters:
+			    max_jobs_on_homepage: 10
+			    max_jobs_on_category: 20
+
+		- change the JobRepository 'getActiveJobs' method to include an $offset parameter to be used by doctrine when retrieving jobs
+
 
 	
 
